@@ -1,0 +1,46 @@
+---
+- name: Install Requirements
+  yum: name={{ item }} state=latest
+  with_items:
+    - git
+    - golang
+
+- name: Add user git
+  user: name=git comment=Gogs system=yes
+
+- name: Create directory go
+  sudo_user: git
+  file: path=/home/git/go state=directory
+
+- name: Export environment variables
+  sudo_user: git
+  lineinfile: dest=/home/git/.bashrc line="{{ item }}"
+  with_items:
+    - export GOPATH=$HOME/go
+    - export PATH=$PATH:$GOPATH/bin
+
+- name: Install Gogs
+  sudo_user: git
+  environment:
+    GOPATH: /home/git/go
+  shell: go get -u github.com/gogits/gogs
+
+- name: Build Gogs
+  sudo_user: git
+  environment:
+    GOPATH: /home/git/go
+  shell: cd /home/git/go/src/github.com/gogits/gogs &&
+         go build
+
+- name: Create symling gogs
+  sudo_user: git
+  file: path=/home/git/gogs src=/home/git/go/src/github.com/gogits/gogs state=link
+
+- name: Copy systemd settings
+  shell: cp /home/git/go/src/github.com/gogits/gogs/scripts/systemd/gogs.service /lib/systemd/system/.
+  
+- name: Start gogs
+  service: name=gogs state=restarted enabled=yes
+
+- name: Create gogs db
+  shell: echo CREATE DATABASE gogs | psql -U postgres

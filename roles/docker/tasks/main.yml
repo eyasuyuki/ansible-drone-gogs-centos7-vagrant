@@ -1,0 +1,15 @@
+---
+- name: Yum update
+  shell: yum -y update
+
+- name: Install Docker
+  yum: name={{ item }} state=latest
+  with_items:
+    - docker
+    - docker-python
+
+- name: Start docker
+  service: name=docker state=started enabled=yes
+
+- name: Install nsenter
+  shell: docker run --rm -v /usr/local/bin:/target jpetazzo/nsenter

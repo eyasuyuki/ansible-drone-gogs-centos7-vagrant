@@ -1,0 +1,27 @@
+---
+- name: Install PostgreSQL
+  yum: name={{ item }} state=latest
+  with_items:
+    - postgresql
+    - postgresql-server
+    - postgresql-devel
+    - postgresql-contrib
+
+- name: Check pgdata
+  shell: find /var/lib/pgsql/data -type f -empty
+  register: pgdata_empty
+  ignore_errors: yes
+- name: Initdb
+  sudo_user: postgres
+  shell: cd /var/lib/pgsql &&
+         initdb --encoding=UTF8 --no-locale --pgdata=/var/lib/pgsql/data
+  when: pgdata_empty.stdout == ""
+  
+- name: Copy config
+  copy: src={{ item }} dest=/var/lib/pgsql/data/{{ item }}
+  with_items:
+    - postgresql.conf
+    - pg_hba.conf
+
+- name: Start Server
+  service: name=postgresql state=restarted enabled=yes
