@@ -5,5 +5,5 @@
     - docker
     - postgresql
     - gogs
-    # - drone
+    - drone
 
