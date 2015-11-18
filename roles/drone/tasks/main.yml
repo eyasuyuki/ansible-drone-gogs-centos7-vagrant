@@ -1,0 +1,27 @@
+---
+- name: Create Drone.id Directory
+  file: path=/var/lib/drone state=directory
+
+- name: Install Drone.io
+  with_items:
+    - "present"
+    - "restarted"
+  docker:
+    name: drone
+    image: drone/drone:0.4
+    state: "{{ item }}"
+    insecure_registry: yes
+    env:
+      DATABASE_DRIVER: postgres
+      DATABASE_CONFIG: postgres://postgres::@172.17.42.1:5432/postgres?sslmode=disable
+      REMOTE_DRIVER: gogs
+      REMOTE_CONFIG: http://172.17.42.1:3000?open=true
+      DOCKER_HOST: unix://ver/run/docker.sock
+      PLUGIN_FILTER: plugins/*
+    volumes:
+      - "/var/lib/drone:/var/lib/drone"
+      - "/var/run/docker.sock:/var/lib/docker.sock"
+    expose:
+      - "8000"
+    ports:
+      - "8000:8000"
