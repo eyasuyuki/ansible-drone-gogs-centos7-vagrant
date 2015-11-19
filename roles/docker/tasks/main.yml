@@ -13,3 +13,9 @@
 
 - name: Install nsenter
   shell: docker run --rm -v /usr/local/bin:/target jpetazzo/nsenter
+
+- name: Add vagrant to dockerroot
+  user: name=vagrant groups=dockerroot
+
+- name: Change group of docker.sock
+  file: path=/var/run/docker.sock group=dockerroot
