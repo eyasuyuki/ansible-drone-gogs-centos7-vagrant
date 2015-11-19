@@ -8,8 +8,11 @@
     - "restarted"
   docker:
     name: drone
-    image: drone/drone:0.4
+    image: mattgruter/drone:latest
     state: "{{ item }}"
+    restart_policy: always
+    detach: true
+    privileged: true
     insecure_registry: yes
     env:
       DATABASE_DRIVER: postgres
@@ -20,8 +23,8 @@
       PLUGIN_FILTER: plugins/*
     volumes:
       - "/var/lib/drone:/var/lib/drone"
-      - "/var/run/docker.sock:/var/lib/docker.sock"
+      - "/var/run/docker.sock:/var/run/docker.sock"
     expose:
-      - "8000"
+      - "80"
     ports:
-      - "8000:8000"
+      - "8080:80"
