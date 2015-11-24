@@ -3,7 +3,7 @@
   yum: name={{ item }} state=latest
   with_items:
     - git
-    - golang
+    - wget
 
 - name: Add user git
   user: name=git comment=Gogs system=yes
@@ -23,12 +23,14 @@
   sudo_user: git
   environment:
     GOPATH: /home/git/go
+    PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
   shell: go get -u github.com/gogits/gogs
 
 - name: Build Gogs
   sudo_user: git
   environment:
     GOPATH: /home/git/go
+    PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
   shell: cd /home/git/go/src/github.com/gogits/gogs &&
          go build
 
