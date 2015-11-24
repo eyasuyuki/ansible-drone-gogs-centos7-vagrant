@@ -1,40 +1,50 @@
 ---
-# - name: Create Drone.id Directory
-#   file: path=/var/lib/drone state=directory
+- name: Download libsqlite3
+  get_url: url=https://www.sqlite.org/2015/sqlite-autoconf-3081101.tar.gz dest=/tmp/libsqlite3.tgz
+  
+- name: Extract libsqlite3
+  unarchive: src=/tmp/libsqlite3.tgz dest=/tmp copy=no
+  
+- name: Build libsqlite3
+  shell: cd /tmp/sqlite-autoconf-3081101 &&
+         ./configure -prefix=/scratch/usr/local &&
+         make &&
+         make install
+       
+- name: Clone sassc
+  git: repo="{{ item.repo }}" clone=yes dest="/tmp/{{ item.name }}"
+  with_items:
+    - { repo: 'https://github.com/sass/libsass.git', name: 'libsass' }
+    - { repo: 'https://github.com/sass/sassc.git', name: 'sassc' }
 
-# - name: Install Drone.io
-#   with_items:
-#     - "present"
-#     - "restarted"
-#   docker:
-#     name: drone
-#     image: mattgruter/drone:latest
-#     state: "{{ item }}"
-#     restart_policy: always
-#     detach: true
-#     privileged: true
-#     insecure_registry: yes
-#     env:
-#       DATABASE_DRIVER: postgres
-#       DATABASE_CONFIG: postgres://postgres::@172.17.42.1:5432/postgres?sslmode=disable
-#       REMOTE_DRIVER: gogs
-#       REMOTE_CONFIG: http://172.17.42.1:3000?open=true
-#       DOCKER_HOST: unix://ver/run/docker.sock
-#       PLUGIN_FILTER: plugins/*
-#     volumes:
-#       - "/var/lib/drone:/var/lib/drone"
-#       - "/var/run/docker.sock:/var/run/docker.sock"
-#     expose:
-#       - "80"
-#     ports:
-#       - "8080:80"
+- name: Build sassc
+  environment:
+    SASS_LIBSASS_PATH: /tmp/libsass
+  shell: cd /tmp/sassc &&
+         make &&
+         install -t /usr/local/bin bin/sassc
+    
+- name: Create Drone.id Directory
+  file: path=/var/lib/drone state=directory
 
-- name: Install Drone.io
-  yum: name=http://downloads.drone.io/master/drone.rpm state=present
-  ignore_errors: yes
+- name: Create Gopath dir
+  file: path=/tmp/gocode state=directory
+
+- name: Clone Drone.io
+  environment:
+    GOPATH: /tmp/gocode
+  git: repo=https://github.com/drone/drone.git clone=yes dest=/tmp/gocode/src/github.com/drone/drone
+
+- name: Build Drone.io
+  environment:
+    GO15VENDOREXPERIMENT: 1
+    GOPATH: /tmp/gocode
+    PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/tmp/gocode/bin
+  shell: cd /tmp/gocode/src/github.com/drone/drone &&
+         make deps &&
+         make gen &&
+         make build
+#         go build --ldflags '-extldflags "-static"' -o drone_static
 
 - name: Copy drone.toml
   copy: src=drone.toml dest=/etc/drone/drone.toml
-
-- name: Start Drone.io
-  service: name=drone state=restarted enabled=yes
