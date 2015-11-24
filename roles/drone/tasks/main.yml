@@ -25,6 +25,7 @@
       - "/var/lib/drone:/var/lib/drone"
       - "/var/run/docker.sock:/var/run/docker.sock"
     expose:
-      - "80"
+      - "8000"
     ports:
-      - "8080:80"
+      - "8000:8000"
+  ignore_errors: yes
