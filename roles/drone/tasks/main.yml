@@ -8,7 +8,7 @@
     - "restarted"
   docker:
     name: drone
-    image: mattgruter/drone:latest
+    image: drone/drone:latest
     state: "{{ item }}"
     restart_policy: always
     detach: true
@@ -18,7 +18,7 @@
       DATABASE_DRIVER: postgres
       DATABASE_CONFIG: postgres://postgres::@172.17.42.1:5432/postgres?sslmode=disable
       REMOTE_DRIVER: gogs
-      REMOTE_CONFIG: http://172.17.42.1:3000?open=true
+      REMOTE_CONFIG: http://172.17.42.1:3000
       DOCKER_HOST: unix://ver/run/docker.sock
       PLUGIN_FILTER: plugins/*
     volumes:
