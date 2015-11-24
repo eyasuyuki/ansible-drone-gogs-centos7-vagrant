@@ -57,7 +57,7 @@ datasource="postgres://postgres::@127.0.0.1:5432/postgres?sslmode=disable
 
 [gogs]
 url="http://127.0.0.1:3000"
-# secret=""
+secret="b7a28374738158857d1b37628e6479fd26c73736"
 open=true
 
 #####################################################################
