@@ -1,0 +1,18 @@
+---
+
+- name: remove Go package
+  yum: name=golang state=absent
+  ignore_errors: yes
+  
+- name: Download Go 1.5
+  get_url: url=https://storage.googleapis.com/golang/go1.5.1.linux-amd64.tar.gz dest=/tmp/go.tgz
+  
+- name: Install Go 1.5
+  unarchive: src=/tmp/go.tgz dest=/usr/local copy=no
+         
+- name: Create symlink go executables
+  file: name="/usr/local/bin/{{ item }}" src="/usr/local/go/bin/{{ item }}" state=link
+  with_items:
+    - go
+    - godoc
+    - gofmt
