@@ -33,6 +33,14 @@ ansible-playbook setup.yml -vvvv --private-key=.vagrant/machines/default/virtual
 # Test PostgreSQL
 
 ```
-psql -U postgres --host 192.168.33.10 --port 5432
+psql -U postgres --host 192.168.55.10 --port 5432
+```
+
+# Setup Gogs
+
+Access these URI by Browser.
+
+```
+http://192.168.55.10:3000
 ```
 
