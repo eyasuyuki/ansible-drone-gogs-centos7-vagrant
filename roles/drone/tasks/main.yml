@@ -2,6 +2,9 @@
 - name: Create Drone.id Directory
   file: path=/var/lib/drone state=directory
 
+- name: Create Database drone
+  shell: echo 'CREATE DATABASE drone;' | psql -U postgres
+
 - name: Install Drone.io
   with_items:
     - "present"
@@ -16,7 +19,7 @@
     insecure_registry: yes
     env:
       DATABASE_DRIVER: postgres
-      DATABASE_CONFIG: postgres://postgres::@172.17.42.1:5432/postgres?sslmode=disable
+      DATABASE_CONFIG: postgres://postgres::@172.17.42.1:5432/drone?sslmode=disable
       REMOTE_DRIVER: gogs
       REMOTE_CONFIG: http://172.17.42.1:3000
       DOCKER_HOST: unix://ver/run/docker.sock
