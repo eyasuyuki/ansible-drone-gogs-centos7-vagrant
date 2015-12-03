@@ -19,12 +19,18 @@
     - export GOPATH=$HOME/go
     - export PATH=$PATH:$GOPATH/bin
 
+- name: Check Gogs
+  shell: ps ax | grep "/home/git/gogs/gogs web"
+  register: gogs_exists
+  ignore_errors: yes
+
 - name: Install Gogs
   sudo_user: git
   environment:
     GOPATH: /home/git/go
     PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
   shell: go get -u github.com/gogits/gogs
+  when: gogs_exists.rc != 0
 
 - name: Build Gogs
   sudo_user: git
@@ -33,8 +39,9 @@
     PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
   shell: cd /home/git/go/src/github.com/gogits/gogs &&
          go build
+  when: gogs_exists.rc != 0
 
-- name: Create symling gogs
+- name: Create symlink gogs
   sudo_user: git
   file: path=/home/git/gogs src=/home/git/go/src/github.com/gogits/gogs state=link
 
